@@ -1,0 +1,46 @@
+@page "/Message"
+@using System.Net
+@using BlazorApp.Shared
+@inject HttpClient Http
+<h3>Message</h3>
+
+<ul>
+    @foreach (var msg in messages)
+    {
+        <li>@msg.MessageText</li>
+    }
+</ul>
+
+
+<input @bind="currentMessageText" type="text" id="message" name="message" placeholder="Enter your message...">
+
+<button @onclick="SendMessage">Send</button>
+
+@code {
+    List<Message> messages = [];
+    string currentMessageText = "";
+    string currentUserName = "user1";
+    
+    protected override async Task OnInitializedAsync()
+    {
+        var resp = await Http.GetFromJsonAsync<Message[]>("http://localhost:7071/api/message") ?? Array.Empty<Message>();
+        messages = resp.ToList();
+    }
+
+    private async Task SendMessage()
+    {
+        if (currentMessageText == "") return;
+        string url = $"http://localhost:7071/api/message?UserName={Uri.EscapeDataString(currentUserName)}&MessageText={Uri.EscapeDataString(currentMessageText)}";
+        try
+        {
+            var resp = await Http.PostAsync(url, null);
+            if (resp.StatusCode != HttpStatusCode.OK) return;
+            messages.Add(new Message(currentUserName, currentMessageText));
+            currentMessageText = "";
+        }
+        catch (Exception ex)
+        {
+            return;
+        }
+    }
+}
