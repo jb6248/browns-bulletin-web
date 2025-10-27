@@ -4,17 +4,27 @@
 @inject HttpClient Http
 <h3>Message</h3>
 
-<ul>
     @foreach (var msg in messages)
     {
-        <li>@msg.MessageText</li>
+        var position = msg.UserName == currentUserName
+            ? ChatBubblePosition.End
+            : ChatBubblePosition.Start;
+        <MudChat ChatPosition="position">
+            <MudChatHeader Name="@msg.UserName" />
+            <MudChatBubble>
+                @msg.MessageText
+            </MudChatBubble>
+        </MudChat>
     }
-</ul>
 
+<MudTextField @bind-Value="currentMessageText"
+              Placeholder="Enter your message..."
+              Variant="Variant.Outlined"
+              InputType="InputType.Text"
+              Id="message"
+              Name="message" />
+<MudButton @onclick="SendMessage" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Send</MudButton>
 
-<input @bind="currentMessageText" type="text" id="message" name="message" placeholder="Enter your message...">
-
-<button @onclick="SendMessage">Send</button>
 
 @code {
     List<Message> messages = [];
