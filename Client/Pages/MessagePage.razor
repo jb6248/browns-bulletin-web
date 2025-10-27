@@ -4,27 +4,39 @@
 @inject HttpClient Http
 <h3>Message</h3>
 
-    @foreach (var msg in messages)
-    {
-        var position = msg.UserName == currentUserName
-            ? ChatBubblePosition.End
-            : ChatBubblePosition.Start;
-        <MudChat ChatPosition="position">
-            <MudChatHeader Name="@msg.UserName" />
-            <MudChatBubble>
-                @msg.MessageText
-            </MudChatBubble>
-        </MudChat>
-    }
-
-<MudTextField @bind-Value="currentMessageText"
-              Placeholder="Enter your message..."
-              Variant="Variant.Outlined"
-              InputType="InputType.Text"
-              Id="message"
-              Name="message" />
-<MudButton @onclick="SendMessage" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Send</MudButton>
-
+<MudContainer>
+    
+    <MudPaper>
+        @foreach (var msg in messages)
+        {
+            var position = msg.UserName == currentUserName
+                ? ChatBubblePosition.End
+                : ChatBubblePosition.Start;
+            <MudChat ChatPosition="position">
+                @if (msg.UserName != currentUserName)
+                {
+                    <MudChatHeader Name="@msg.UserName"/>
+                }
+                <MudChatBubble>
+                    @msg.MessageText
+                </MudChatBubble>
+            </MudChat>
+        }
+    </MudPaper>
+    
+    <MudStack Row="true" AlignItems="AlignItems.Center">
+        <MudForm>
+            <MudTextField @bind-Value="currentMessageText"
+                          Placeholder="Enter your message..."
+                          AutoGrow="false"
+                          Variant="Variant.Outlined"
+                          InputType="InputType.Text"
+                          Id="message"
+                          Name="message"/>
+        </MudForm>
+        <MudButton @onclick="SendMessage" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Send</MudButton>
+    </MudStack>
+</MudContainer>
 
 @code {
     List<Message> messages = [];
