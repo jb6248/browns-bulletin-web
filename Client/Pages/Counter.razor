@@ -1,18 +1,26 @@
 ﻿@page "/counter"
+@using BlazorApp.Client.State
+@inject UserState UserState
 
-<PageTitle>Counter</PageTitle>
+<PageTitle>Login</PageTitle>
 
-<h1>Counter</h1>
+<h1>Login</h1>
 
-<p role="status">Current count: @currentCount</p>
+<!-- "logs in" a user if they haven't already -->
 
-<button class="btn btn-primary" @onclick="IncrementCount">Click me</button>
+@if (UserState.CurrentUser is null)
+{
+    <MudPaper>
+        <p role="status">Enter a username here: </p>
+        <input @bind="_username" Placeholder="Enter username..."/> 
+        <MudButton Variant="Variant.Outlined" class="btn btn-primary" @onclick="() => UserState.CurrentUser = _username">Set username</MudButton>
+    </MudPaper>
+}
+else
+{
+    <p>Username set to @UserState.CurrentUser</p>
+}
 
 @code {
-    private int currentCount = 0;
-
-    private void IncrementCount()
-    {
-        currentCount++;
-    }
+    private string _username = "";
 }
