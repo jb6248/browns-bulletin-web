@@ -7,15 +7,14 @@ using BlazorApp.Shared;
 using Microsoft.Azure.Functions.Worker;
 using Microsoft.Azure.Functions.Worker.Http;
 
-public static class MessageFunctions
+public class MessageFunctions(AzureContext db)
 {
     [Function("SaveMessage")]
-    public static async Task<HttpResponseData> SaveMessage(
+    public async Task<HttpResponseData> SaveMessage(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "message")]
         HttpRequestData req
     )
     {
-        var db = new AzureContext();
         var msg = new Message(req.Query["UserName"], req.Query["MessageText"]);
         try
         {
@@ -32,12 +31,11 @@ public static class MessageFunctions
     }
     
     [Function("GetMessages")]
-    public static async Task<HttpResponseData> GetMessages(
+    public async Task<HttpResponseData> GetMessages(
         [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "message")]
         HttpRequestData req 
     )
     {
-        var db = new AzureContext();
         var messages = await db.Messages.ToListAsync();
         var response = req.CreateResponse(HttpStatusCode.OK);
         await response.WriteAsJsonAsync(messages);

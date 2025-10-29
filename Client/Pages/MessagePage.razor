@@ -33,14 +33,14 @@
     
     protected override async Task OnInitializedAsync()
     {
-        var resp = await Http.GetFromJsonAsync<Message[]>("http://localhost:7071/api/message") ?? Array.Empty<Message>();
+        var resp = await Http.GetFromJsonAsync<Message[]>("api/message") ?? Array.Empty<Message>();
         messages = resp.ToList();
     }
 
     private async Task SendMessage()
     {
         if (currentMessageText == "") return;
-        string url = $"http://localhost:7071/api/message?UserName={Uri.EscapeDataString(currentUserName)}&MessageText={Uri.EscapeDataString(currentMessageText)}";
+        string url = $"api/message?UserName={Uri.EscapeDataString(currentUserName)}&MessageText={Uri.EscapeDataString(currentMessageText)}";
         try
         {
             var resp = await Http.PostAsync(url, null);

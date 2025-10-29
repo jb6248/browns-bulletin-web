@@ -5,6 +5,10 @@ using Microsoft.EntityFrameworkCore;
 
 public class AzureContext : DbContext
 {
+
+    public AzureContext(DbContextOptions<AzureContext> options) : base(options)
+    {
+    }
     public DbSet<Message> Messages { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
