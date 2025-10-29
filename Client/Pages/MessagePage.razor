@@ -1,56 +1,69 @@
 @page "/Message"
-@using System.Net
-@using BlazorApp.Shared
-@inject HttpClient Http
-<h3>Message</h3>
+@using BlazorApp.Client.State
+@inject UserState UserState
+@inject MessageState MessageState
 
-    @foreach (var msg in messages)
-    {
-        var position = msg.UserName == currentUserName
-            ? ChatBubblePosition.End
-            : ChatBubblePosition.Start;
-        <MudChat ChatPosition="position">
-            <MudChatHeader Name="@msg.UserName" />
-            <MudChatBubble>
-                @msg.MessageText
-            </MudChatBubble>
-        </MudChat>
-    }
+<h3>Messages</h3>
 
-<MudTextField @bind-Value="currentMessageText"
-              Placeholder="Enter your message..."
-              Variant="Variant.Outlined"
-              InputType="InputType.Text"
-              Id="message"
-              Name="message" />
-<MudButton @onclick="SendMessage" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Send</MudButton>
-
+@if (UserState.CurrentUser is null)
+{
+    <p>Choose a username first...</p>
+} else if (MessageState.Messages is null) {
+    <p>Loading messages...</p>
+} else
+{
+    <MudContainer>
+        <!-- display the messages -->
+        <MudPaper>
+            @foreach (var msg in MessageState.Messages)
+            {
+                var position = msg.UserName == UserState.CurrentUser
+                    ? ChatBubblePosition.End
+                    : ChatBubblePosition.Start;
+                <MudChat ChatPosition="position">
+                    @if (msg.UserName != UserState.CurrentUser)
+                    {
+                        <MudChatHeader Name="@msg.UserName"/>
+                    }
+                    <MudChatBubble>
+                        @msg.MessageText
+                    </MudChatBubble>
+                </MudChat>
+            }
+        </MudPaper>
+        <!-- display the input field and button -->
+        <MudStack Row="true" AlignItems="AlignItems.Center">
+            <MudForm>
+                <MudTextField @bind-Value="_currentMessageText"
+                              Placeholder="Enter your message..."
+                              AutoGrow="false"
+                              Variant="Variant.Outlined"
+                              InputType="InputType.Text"
+                              Id="message"
+                              Name="message"/>
+            </MudForm>
+            <MudButton @onclick="SendMsg" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Send</MudButton>
+        </MudStack>
+    </MudContainer>   
+}
 
 @code {
-    List<Message> messages = [];
-    string currentMessageText = "";
-    string currentUserName = "user1";
+    string _currentMessageText = "";
+
+    // call the send message method, reset the message input str
+    private async Task SendMsg()
+    {
+        await MessageState.SendMessage(_currentMessageText);
+        _currentMessageText = "";
+    }
     
+    // load the existing messages if there are some
     protected override async Task OnInitializedAsync()
     {
-        var resp = await Http.GetFromJsonAsync<Message[]>("api/message") ?? Array.Empty<Message>();
-        messages = resp.ToList();
+        if (MessageState.Messages is null)
+        {
+            await MessageState.LoadMessages();   
+        }
     }
 
-    private async Task SendMessage()
-    {
-        if (currentMessageText == "") return;
-        string url = $"api/message?UserName={Uri.EscapeDataString(currentUserName)}&MessageText={Uri.EscapeDataString(currentMessageText)}";
-        try
-        {
-            var resp = await Http.PostAsync(url, null);
-            if (resp.StatusCode != HttpStatusCode.OK) return;
-            messages.Add(new Message(currentUserName, currentMessageText));
-            currentMessageText = "";
-        }
-        catch (Exception ex)
-        {
-            return;
-        }
-    }
 }

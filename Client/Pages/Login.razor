@@ -1,0 +1,26 @@
+﻿@page "/login"
+@using BlazorApp.Client.State
+@inject UserState UserState
+
+<PageTitle>Login</PageTitle>
+
+<h1>Login</h1>
+
+<!-- "logs in" a user if they haven't already -->
+
+@if (UserState.CurrentUser is null)
+{
+    <MudPaper>
+        <p role="status">Enter a username here: </p>
+        <input @bind="_username" Placeholder="Enter username..."/> 
+        <MudButton Variant="Variant.Outlined" class="btn btn-primary" @onclick="() => UserState.CurrentUser = _username">Set username</MudButton>
+    </MudPaper>
+}
+else
+{
+    <p>Username set to @UserState.CurrentUser</p>
+}
+
+@code {
+    private string _username = "";
+}
