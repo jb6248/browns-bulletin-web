@@ -1,15 +1,17 @@
 using System.Net.Http.Json;
+
 namespace BlazorApp.Client.State;
+
 using Shared;
 using System.Net;
 using Microsoft.Azure.Cosmos.Linq;
- 
+
 /// <summary>
 /// Stores all the messages in current session
 /// </summary>
 public class MessageState
 {
-    private readonly UserState _userState; 
+    private readonly UserState _userState;
     public List<Message>? Messages { get; set; }
     private HttpClient _http;
 
@@ -19,19 +21,30 @@ public class MessageState
         _userState = userState;
         _http = http;
     }
-    
+
     public async Task LoadMessages()
     {
+        if (_userState.CurrentUser is null) return;
         // hit the azure load msg function and save
-        var resp = await _http.GetFromJsonAsync<Message[]>("http://localhost:7071/api/message") ?? Array.Empty<Message>();
-        Messages = resp.ToList();
+        try
+        {
+            var r = await _http.GetAsync($"api/message/{_userState.CurrentUser}");
+            Console.WriteLine(r);
+            var resp = await _http.GetFromJsonAsync<Message[]>($"api/message/{_userState.CurrentUser}") ?? [];
+            Messages = resp.ToList();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+        }
     }
 
     // add a new message to the state
     public async Task SendMessage(string message)
     {
         if (message == "" || _userState.CurrentUser is null) return;
-        var url = $"http://localhost:7071/api/message?UserName={Uri.EscapeDataString(_userState.CurrentUser)}&MessageText={Uri.EscapeDataString(message)}";
+        var url =
+            $"api/message?UserName={Uri.EscapeDataString(_userState.CurrentUser)}&MessageText={Uri.EscapeDataString(message)}";
         try
         {
             var resp = await _http.PostAsync(url, null);

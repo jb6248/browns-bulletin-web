@@ -1,16 +1,22 @@
 @page "/Message"
 @using BlazorApp.Client.State
+@using BlazorApp.Shared
 @inject UserState UserState
 @inject MessageState MessageState
+@inject BbrService BbrService
 
 <h3>Messages</h3>
 
 @if (UserState.CurrentUser is null)
 {
     <p>Choose a username first...</p>
-} else if (MessageState.Messages is null) {
+    <a href="login">Go to Login Page</a>
+}
+else if (MessageState.Messages is null)
+{
     <p>Loading messages...</p>
-} else
+}
+else
 {
     <MudContainer>
         <!-- display the messages -->
@@ -44,7 +50,7 @@
             </MudForm>
             <MudButton @onclick="SendMsg" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Send</MudButton>
         </MudStack>
-    </MudContainer>   
+    </MudContainer>
 }
 
 @code {
@@ -56,14 +62,23 @@
         await MessageState.SendMessage(_currentMessageText);
         _currentMessageText = "";
     }
-    
+
     // load the existing messages if there are some
     protected override async Task OnInitializedAsync()
     {
         if (MessageState.Messages is null)
         {
-            await MessageState.LoadMessages();   
+            await MessageState.LoadMessages();
         }
+
+        BbrService.OnMessageReceived += HandleMessageReceived;
+        await BbrService.InitializeAsync();
+    }
+
+    void HandleMessageReceived(Message message)
+    {
+        Console.WriteLine("Message received: " + message.MessageText);
+        // InvokeAsync(async () => { StateHasChanged(); });
     }
 
 }

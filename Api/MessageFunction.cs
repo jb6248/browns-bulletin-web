@@ -32,11 +32,15 @@ public class MessageFunctions(AzureContext db)
     
     [Function("GetMessages")]
     public async Task<HttpResponseData> GetMessages(
-        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "message")]
-        HttpRequestData req 
+        [HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "message/{username?}")]
+        HttpRequestData req,
+        string? username
     )
     {
-        var messages = await db.Messages.ToListAsync();
+        var messages = string.IsNullOrEmpty(username)
+            ? await db.Messages
+                .ToListAsync()
+            : await db.Messages.Where(m => m.UserName == username).ToListAsync(); // || (m.destination == username && m.DestinationType == Destination.User)).ToListAsync();
         var response = req.CreateResponse(HttpStatusCode.OK);
         await response.WriteAsJsonAsync(messages);
         return response;
