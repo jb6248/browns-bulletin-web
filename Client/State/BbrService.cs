@@ -14,7 +14,9 @@ namespace BlazorApp.Client.State;
 public class BbrService
 {
     private readonly HttpClient _http;
-    public event Action<Message>? OnMessageReceived;
+    
+    private static string UPDATE_MESSAGE_METHOD = "UpdateMessage";
+    public event Action<MessageUpdate>? OnMessageUpdate;
 
     private HubConnection? _hubConnection;
     // private ServiceManager _serviceManager;
@@ -78,24 +80,25 @@ public class BbrService
                 options.AccessTokenProvider = () => Task.FromResult(negotiateInfo.AccessToken);
             })
             .Build();
-
-
-        _hubConnection.On<Message>("ReceiveMessage", (message) =>
+        
+        
+        _hubConnection.On<MessageUpdate>(UPDATE_MESSAGE_METHOD, (update) =>
         {
-            Console.WriteLine("Received message via SignalR: " + message.MessageText);
-            OnMessageReceived?.Invoke(message);
+            Console.WriteLine("Received message update via SignalR: " + update.MessageText);
+            OnMessageUpdate?.Invoke(update);
         });
         
         await _hubConnection.StartAsync();
         Console.WriteLine("SignalR connection started.");
     }
-
-    public async Task SendMessageAsync(Message message)
+    
+    public async Task BroadcastMessageUpdateAsync(MessageUpdate update)
     {
         if (_hubConnection is null) return;
         if (_hubConnection.State == HubConnectionState.Connected)
         {
-            await _hubConnection.InvokeAsync("SendMessage", message);
+            Console.WriteLine("Broadcasting message update via SignalR: " + update.MessageText);
+            await _hubConnection.InvokeAsync(UPDATE_MESSAGE_METHOD, update);
         }
     }
 }

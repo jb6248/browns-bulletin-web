@@ -42,7 +42,7 @@ public class MessageState
     }
 
     // add a new message to the state
-    public async Task SendMessage(string message)
+    public async Task SendMessage(string message, string guid)
     {
         if (message == "" || _userState.CurrentUser is null) return;
         var url =
@@ -53,7 +53,10 @@ public class MessageState
             if (resp.StatusCode != HttpStatusCode.OK) return;
             if (Messages is not null)
             {
-                Messages.Add(new Message(_userState.CurrentUser, message));
+                Messages.Add(new Message(_userState.CurrentUser, message)
+                {
+                    Id = guid
+                });
             }
             else
             {
@@ -63,6 +66,24 @@ public class MessageState
         catch (Exception ex)
         {
             return;
+        }
+    }
+
+    public void ProcessUpdateMessage(MessageUpdate update)
+    {
+        if (Messages is null) return;
+        var msg = Messages.FirstOrDefault(m => m.Id == update.Id);
+        if (msg is not null)
+        {
+            msg.MessageText = update.MessageText;
+        }
+        else
+        {
+            // create the new message
+            Messages.Add(new Message(update.UserName, update.MessageText)
+            {
+                Id = update.Id
+            });
         }
     }
 }

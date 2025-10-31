@@ -40,13 +40,16 @@ else
         <!-- display the input field and button -->
         <MudStack Row="true" AlignItems="AlignItems.Center">
             <MudForm>
-                <MudTextField @bind-Value="_currentMessageText"
+                <MudTextField Value="@_currentMessageText"
+                              T="string"
+                              ValueChanged="s => OnMessageTextChanged(s)"
                               Placeholder="Enter your message..."
                               AutoGrow="false"
                               Variant="Variant.Outlined"
                               InputType="InputType.Text"
                               Id="message"
-                              Name="message"/>
+                              Name="message"
+                              Immediate="true"/>
             </MudForm>
             <MudButton @onclick="SendMsg" Variant="Variant.Filled" EndIcon="@Icons.Material.Filled.Send" Color="Color.Primary">Send</MudButton>
         </MudStack>
@@ -55,11 +58,27 @@ else
 
 @code {
     string _currentMessageText = "";
+    string _currentDraftGuid = Guid.NewGuid().ToString();
+
+    // called whenever the text field value changes
+    private async Task OnMessageTextChanged(string value)
+    {
+        Console.WriteLine("Message text changed: " + value);
+        _currentMessageText = value;
+        await BbrService.BroadcastMessageUpdateAsync(new MessageUpdate()
+        {
+            Id = _currentDraftGuid,
+            MessageText = _currentMessageText,
+            UserName = UserState.CurrentUser
+        });
+        await Task.CompletedTask;
+    }
 
     // call the send message method, reset the message input str
     private async Task SendMsg()
     {
-        await MessageState.SendMessage(_currentMessageText);
+        await MessageState.SendMessage(_currentMessageText, _currentDraftGuid);
+        _currentDraftGuid = Guid.NewGuid().ToString();
         _currentMessageText = "";
     }
 
@@ -71,14 +90,16 @@ else
             await MessageState.LoadMessages();
         }
 
-        BbrService.OnMessageReceived += HandleMessageReceived;
+        BbrService.OnMessageUpdate += HandleMessageUpdate;
         await BbrService.InitializeAsync();
+        Console.WriteLine("BBR service initialized in MessagePage.");
     }
 
-    void HandleMessageReceived(Message message)
+    void HandleMessageUpdate(MessageUpdate message)
     {
         Console.WriteLine("Message received: " + message.MessageText);
-        // InvokeAsync(async () => { StateHasChanged(); });
+        MessageState.ProcessUpdateMessage(message);
+        StateHasChanged();
     }
 
 }
