@@ -72,27 +72,22 @@ public class BbrService
         //     .Build();
 
 
-        try
-        {
-            _hubConnection = new HubConnectionBuilder()
-                .WithUrl(negotiateInfo.Url)
-                .Build();
-        }
-        catch (Exception e)
-        {
-            Console.WriteLine(e);
-            Console.WriteLine(e.InnerException);
-        }
+        _hubConnection = new HubConnectionBuilder()
+            .WithUrl(negotiateInfo.Url, options =>
+            {
+                options.AccessTokenProvider = () => Task.FromResult(negotiateInfo.AccessToken);
+            })
+            .Build();
 
 
-        // _hubConnection.On<Message>("ReceiveMessage", (message) =>
-        // {
-        //     Console.WriteLine("Received message via SignalR: " + message.MessageText);
-        //     OnMessageReceived?.Invoke(message);
-        // });
-        //
-        // await _hubConnection.StartAsync();
-        // Console.WriteLine("SignalR connection started.");
+        _hubConnection.On<Message>("ReceiveMessage", (message) =>
+        {
+            Console.WriteLine("Received message via SignalR: " + message.MessageText);
+            OnMessageReceived?.Invoke(message);
+        });
+        
+        await _hubConnection.StartAsync();
+        Console.WriteLine("SignalR connection started.");
     }
 
     public async Task SendMessageAsync(Message message)
