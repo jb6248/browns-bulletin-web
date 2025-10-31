@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Net.Http.Json;
 using BlazorApp.Shared;
 using Microsoft.AspNetCore.SignalR;
@@ -14,6 +15,7 @@ public class BbrService
 {
     private readonly HttpClient _http;
     public event Action<Message>? OnMessageReceived;
+
     private HubConnection? _hubConnection;
     // private ServiceManager _serviceManager;
     // private ServiceHubContext _serviceHubContext;
@@ -22,7 +24,7 @@ public class BbrService
     {
         _http = http;
     }
-    
+
     public async Task InitializeAsync()
     {
         if (_hubConnection is not null) return;
@@ -38,7 +40,7 @@ public class BbrService
         //     .BuildServiceManager();
         // _serviceHubContext = await _serviceManager.CreateHubContextAsync("chat", CancellationToken.None);
         // var negotiationResponse = await _serviceHubContext.NegotiateAsync(new (){UserId = "<Your User Id>"});
-        
+
         // this is chatgpt; this makes sense to me
         // call your Azure Function's negotiate endpoint
         var negotiateResponse = await _http
@@ -61,29 +63,38 @@ public class BbrService
 
         Console.WriteLine("Negotiation info received. URL: " + negotiateInfo.Url);
         Console.WriteLine("Token: " + negotiateInfo.AccessToken);
-        _hubConnection = new HubConnectionBuilder()
-            .WithUrl(negotiateInfo.Url, options =>
-            {
-                options.AccessTokenProvider = () => Task.FromResult(negotiateInfo.AccessToken);
-            })
-            .WithAutomaticReconnect()
-            .Build();
-        
         // _hubConnection = new HubConnectionBuilder()
-        //     .WithUrl("https://bbr.service.signalr.net/chat")
+        //     .WithUrl(negotiateInfo.Url, options =>
+        //     {
+        //         options.AccessTokenProvider = () => Task.FromResult(negotiateInfo.AccessToken);
+        //     })
+        //     .WithAutomaticReconnect()
         //     .Build();
-        
-        
-        _hubConnection.On<Message>("ReceiveMessage", (message) =>
-        {
-            Console.WriteLine("Received message via SignalR: " + message.MessageText);
-            OnMessageReceived?.Invoke(message);
-        });
 
-        await _hubConnection.StartAsync();
-        Console.WriteLine("SignalR connection started.");
+
+        try
+        {
+            _hubConnection = new HubConnectionBuilder()
+                .WithUrl(negotiateInfo.Url)
+                .Build();
+        }
+        catch (Exception e)
+        {
+            Console.WriteLine(e);
+            Console.WriteLine(e.InnerException);
+        }
+
+
+        // _hubConnection.On<Message>("ReceiveMessage", (message) =>
+        // {
+        //     Console.WriteLine("Received message via SignalR: " + message.MessageText);
+        //     OnMessageReceived?.Invoke(message);
+        // });
+        //
+        // await _hubConnection.StartAsync();
+        // Console.WriteLine("SignalR connection started.");
     }
-    
+
     public async Task SendMessageAsync(Message message)
     {
         if (_hubConnection is null) return;

@@ -1,4 +1,5 @@
 using System.Net.Http.Json;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace BlazorApp.Client.State;
 
@@ -29,6 +30,7 @@ public class MessageState
         try
         {
             var r = await _http.GetAsync($"api/message/{_userState.CurrentUser}");
+            Console.WriteLine("Raw response:");
             Console.WriteLine(r);
             var resp = await _http.GetFromJsonAsync<Message[]>($"api/message/{_userState.CurrentUser}") ?? [];
             Messages = resp.ToList();

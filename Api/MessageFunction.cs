@@ -40,7 +40,7 @@ public class MessageFunctions(AzureContext db)
         var messages = string.IsNullOrEmpty(username)
             ? await db.Messages
                 .ToListAsync()
-            : await db.Messages.Where(m => m.UserName == username).ToListAsync(); // || (m.destination == username && m.DestinationType == Destination.User)).ToListAsync();
+            : await db.Messages.ToListAsync(); // || (m.destination == username && m.DestinationType == Destination.User)).ToListAsync();
         var response = req.CreateResponse(HttpStatusCode.OK);
         await response.WriteAsJsonAsync(messages);
         return response;
