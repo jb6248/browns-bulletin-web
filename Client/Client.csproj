@@ -34,15 +34,6 @@
 
 
     <ItemGroup>
-        <Reference Include="Microsoft.AspNetCore.SignalR.Core">
-            <HintPath>..\..\..\..\..\..\..\.nuget\packages\microsoft.aspnetcore.app.ref\8.0.20\ref\net8.0\Microsoft.AspNetCore.SignalR.Core.dll</HintPath>
-        </Reference>
-        <Reference Include="Microsoft.Azure.Functions.Worker.Extensions.SignalRService">
-            <HintPath>..\..\..\..\..\..\..\.nuget\packages\microsoft.azure.functions.worker.extensions.signalrservice\2.0.1\lib\netstandard2.0\Microsoft.Azure.Functions.Worker.Extensions.SignalRService.dll</HintPath>
-        </Reference>
-        <Reference Include="Microsoft.Azure.SignalR.Management">
-            <HintPath>..\..\..\..\..\..\..\.nuget\packages\microsoft.azure.signalr.management\1.29.0\lib\net8.0\Microsoft.Azure.SignalR.Management.dll</HintPath>
-        </Reference>
     </ItemGroup>
 
 </Project>
