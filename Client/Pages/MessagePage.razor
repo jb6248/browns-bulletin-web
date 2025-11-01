@@ -63,7 +63,7 @@ else
     // called whenever the text field value changes
     private async Task OnMessageTextChanged(string value)
     {
-        Console.WriteLine("Message text changed: " + value);
+        Console.WriteLine("Message text changed: " + value + " with guid " + _currentDraftGuid);
         _currentMessageText = value;
         await BbrService.BroadcastMessageUpdateAsync(new MessageUpdate()
         {
@@ -77,6 +77,7 @@ else
     // call the send message method, reset the message input str
     private async Task SendMsg()
     {
+        Console.WriteLine("Sending message with guid " + _currentDraftGuid);
         await MessageState.SendMessage(_currentMessageText, _currentDraftGuid);
         _currentDraftGuid = Guid.NewGuid().ToString();
         _currentMessageText = "";

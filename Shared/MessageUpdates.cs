@@ -2,6 +2,7 @@ namespace BlazorApp.Shared;
 
 public class MessageUpdate
 {
+    public static string MethodName = "MessageUpdate";
     public string Id { get; set; }
     public string MessageText { get; set; }
     public string UserName { get; set; }

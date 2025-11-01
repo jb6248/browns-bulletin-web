@@ -15,12 +15,9 @@ public class BbrService
 {
     private readonly HttpClient _http;
     
-    private static string UPDATE_MESSAGE_METHOD = "UpdateMessage";
     public event Action<MessageUpdate>? OnMessageUpdate;
 
     private HubConnection? _hubConnection;
-    // private ServiceManager _serviceManager;
-    // private ServiceHubContext _serviceHubContext;
 
     public BbrService(HttpClient http)
     {
@@ -31,18 +28,7 @@ public class BbrService
     {
         if (_hubConnection is not null) return;
         Console.WriteLine("Initializing SignalR connection...");
-        // https://learn.microsoft.com/en-us/azure/azure-signalr/signalr-concept-client-negotiation
-        // I have no idea why the service manager was suggested; it doesn't seem to help at all
-        // _serviceManager = new ServiceManagerBuilder()
-        //     .WithOptions(option =>
-        //     {
-        //         option.ConnectionString = "<Your Azure SignalR Service Connection String>";
-        //     })
-        //     // .WithLoggerFactory(loggerFactory)
-        //     .BuildServiceManager();
-        // _serviceHubContext = await _serviceManager.CreateHubContextAsync("chat", CancellationToken.None);
-        // var negotiationResponse = await _serviceHubContext.NegotiateAsync(new (){UserId = "<Your User Id>"});
-
+        
         // this is chatgpt; this makes sense to me
         // call your Azure Function's negotiate endpoint
         var negotiateResponse = await _http
@@ -64,16 +50,7 @@ public class BbrService
         }
 
         Console.WriteLine("Negotiation info received. URL: " + negotiateInfo.Url);
-        Console.WriteLine("Token: " + negotiateInfo.AccessToken);
-        // _hubConnection = new HubConnectionBuilder()
-        //     .WithUrl(negotiateInfo.Url, options =>
-        //     {
-        //         options.AccessTokenProvider = () => Task.FromResult(negotiateInfo.AccessToken);
-        //     })
-        //     .WithAutomaticReconnect()
-        //     .Build();
-
-
+        
         _hubConnection = new HubConnectionBuilder()
             .WithUrl(negotiateInfo.Url, options =>
             {
@@ -82,7 +59,7 @@ public class BbrService
             .Build();
         
         
-        _hubConnection.On<MessageUpdate>(UPDATE_MESSAGE_METHOD, (update) =>
+        _hubConnection.On<MessageUpdate>(MessageUpdate.MethodName, (update) =>
         {
             Console.WriteLine("Received message update via SignalR: " + update.MessageText);
             OnMessageUpdate?.Invoke(update);
@@ -94,11 +71,11 @@ public class BbrService
     
     public async Task BroadcastMessageUpdateAsync(MessageUpdate update)
     {
-        if (_hubConnection is null) return;
-        if (_hubConnection.State == HubConnectionState.Connected)
+        // call broadcast function
+        var response = await _http.PostAsJsonAsync("api/broadcast", update);
+        if (!response.IsSuccessStatusCode)
         {
-            Console.WriteLine("Broadcasting message update via SignalR: " + update.MessageText);
-            await _hubConnection.InvokeAsync(UPDATE_MESSAGE_METHOD, update);
+            Console.WriteLine("Failed to broadcast message update.");
         }
     }
 }

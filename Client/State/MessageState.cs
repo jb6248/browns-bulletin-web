@@ -53,10 +53,14 @@ public class MessageState
             if (resp.StatusCode != HttpStatusCode.OK) return;
             if (Messages is not null)
             {
-                Messages.Add(new Message(_userState.CurrentUser, message)
+                var newMessage = new Message(_userState.CurrentUser, message)
                 {
                     Id = guid
-                });
+                };
+                if (!HasMessage(newMessage.Id!))
+                {
+                    Messages.Add(newMessage);
+                }
             }
             else
             {
@@ -67,6 +71,12 @@ public class MessageState
         {
             return;
         }
+    }
+    
+    private bool HasMessage(string id)
+    {
+        if (Messages is null) return false;
+        return Messages.Any(m => m.Id == id);
     }
 
     public void ProcessUpdateMessage(MessageUpdate update)
