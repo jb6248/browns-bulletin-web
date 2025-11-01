@@ -27,8 +27,6 @@ public class BbrService
         if (_hubConnection is not null) return;
         Console.WriteLine("Initializing SignalR connection...");
         
-        // this is chatgpt; this makes sense to me
-        // call your Azure Function's negotiate endpoint
         var negotiateResponse = await _http
             .PostAsync("api/negotiate", null);
 
