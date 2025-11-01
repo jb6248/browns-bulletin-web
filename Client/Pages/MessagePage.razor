@@ -5,7 +5,8 @@
 @inject MessageState MessageState
 @inject BbrService BbrService
 
-<h3>Messages</h3>
+<h2>Messages</h2>
+<h3>Chat connection status: @BbrService.ConnectionStatus</h3>
 
 @if (UserState.CurrentUser is null)
 {
@@ -26,12 +27,13 @@ else
                 var position = msg.UserName == UserState.CurrentUser
                     ? ChatBubblePosition.End
                     : ChatBubblePosition.Start;
+                var color = msg.UserName == UserState.CurrentUser ? Color.Primary : Color.Secondary;
                 <MudChat ChatPosition="position">
                     @if (msg.UserName != UserState.CurrentUser)
                     {
                         <MudChatHeader Name="@msg.UserName"/>
                     }
-                    <MudChatBubble>
+                    <MudChatBubble Color="@color">
                         @msg.MessageText
                     </MudChatBubble>
                 </MudChat>

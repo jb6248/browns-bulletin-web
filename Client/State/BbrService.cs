@@ -19,6 +19,8 @@ public class BbrService
     {
         _http = http;
     }
+    
+    public string ConnectionStatus => _hubConnection?.State.ToString() ?? "Not Connected";
 
     public async Task InitializeAsync()
     {

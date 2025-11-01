@@ -85,6 +85,11 @@ public class MessageState
         var msg = Messages.FirstOrDefault(m => m.Id == update.Id);
         if (msg is not null)
         {
+            if (update.MessageText.Trim() == string.Empty)
+            {
+                Messages.Remove(msg);
+                return;
+            }
             msg.MessageText = update.MessageText;
         }
         else
