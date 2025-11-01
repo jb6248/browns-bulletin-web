@@ -12,14 +12,18 @@ namespace Api;
 public class SignalRFunction
 {
     [Function("Negotiate")]
-    public SignalRConnectionInfo Negotiate(
+    public NegotiationInfo Negotiate(
         [HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "negotiate")]
         HttpRequestData req,
         [SignalRConnectionInfoInput(HubName = "chat",
             ConnectionStringSetting = "AzureSignalRConnectionString")]
         SignalRConnectionInfo connectionInfo)
     {
-        return connectionInfo;
+        return new NegotiationInfo()
+        {
+            AccessToken = connectionInfo.AccessToken,
+            Url = connectionInfo.Url
+        };
     }
     
     [Function("BroadcastMessage")]

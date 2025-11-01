@@ -1,10 +1,6 @@
-using System.Diagnostics;
 using System.Net.Http.Json;
 using BlazorApp.Shared;
-using Microsoft.AspNetCore.SignalR;
 using Microsoft.AspNetCore.SignalR.Client;
-using Microsoft.Azure.Functions.Worker;
-using Microsoft.Azure.SignalR.Management;
 
 namespace BlazorApp.Client.State;
 
@@ -41,7 +37,7 @@ public class BbrService
             return;
         }
 
-        var negotiateInfo = await negotiateResponse.Content.ReadFromJsonAsync<SignalRConnectionInfo>();
+        var negotiateInfo = await negotiateResponse.Content.ReadFromJsonAsync<NegotiationInfo>();
 
         if (negotiateInfo is null)
         {

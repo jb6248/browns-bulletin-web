@@ -3,6 +3,13 @@ using System;
 
 namespace BlazorApp.Shared
 {
+    
+    public class NegotiationInfo
+    {
+        public string? Url { get; set; }
+        public string? AccessToken { get; set; }
+    }
+    
     public enum Destination
     {
         User,
